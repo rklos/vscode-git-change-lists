@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { ChangeListManager } from '../services/changeListManager';
 import { GitService } from '../services/gitService';
 import { ConfigService } from '../services/configService';
+import { PatchService } from '../services/patchService';
 import { ChangeListTreeDataProvider } from '../providers/treeDataProvider';
 import { AnyTreeNode, ChangeListNode, FileNode } from '../types';
 import { COMMANDS } from '../utils/constants';
@@ -13,6 +15,7 @@ export function registerCommands(
   changeListManager: ChangeListManager,
   gitService: GitService,
   configService: ConfigService,
+  patchService: PatchService,
   treeDataProvider: ChangeListTreeDataProvider,
   treeView: vscode.TreeView<AnyTreeNode>
 ): vscode.Disposable[] {
@@ -39,7 +42,7 @@ export function registerCommands(
       if (name) {
         try {
           const setActive = configService.getAutoActivateNew();
-          await changeListManager.create(name.trim(), undefined, setActive);
+          await changeListManager.create(name.trim(), undefined, undefined, setActive);
           vscode.window.showInformationMessage(`Change list "${name}" created`);
         } catch (error) {
           vscode.window.showErrorMessage(`Failed to create change list: ${error}`);
@@ -128,11 +131,13 @@ export function registerCommands(
       } else {
         // Show quick pick to select a list
         const lists = changeListManager.getLists();
-        const items = lists.map((list) => ({
-          label: list.name,
-          description: list.isActive ? '(Active)' : list.isDefault ? '(Default)' : undefined,
-          listId: list.id,
-        }));
+        const items = lists
+          .filter(list => !list.isReadOnly)
+          .map((list) => ({
+            label: list.name,
+            description: list.isActive ? '(Active)' : list.isDefault ? '(Default)' : undefined,
+            listId: list.id,
+          }));
 
         const selected = await vscode.window.showQuickPick(items, {
           placeHolder: 'Select a change list to set as active',
@@ -152,6 +157,68 @@ export function registerCommands(
       }
     })
   );
+
+  // Set Change List Color
+  disposables.push(
+    vscode.commands.registerCommand(COMMANDS.SET_LIST_COLOR, async (node?: ChangeListNode) => {
+      let listId: string | undefined;
+
+      if (node && node.type === 'changeList') {
+        listId = node.changeList.id;
+      } else {
+        // Show quick pick to select a list
+        const lists = changeListManager.getLists();
+        const items = lists.map((list) => ({
+          label: list.name,
+          description: list.isActive ? '(Active)' : list.isDefault ? '(Default)' : undefined,
+          listId: list.id,
+        }));
+
+        const selected = await vscode.window.showQuickPick(items, {
+          placeHolder: 'Select a change list to set color',
+        });
+
+        if (selected) {
+          listId = selected.listId;
+        }
+      }
+
+      if (!listId) {
+        return;
+      }
+
+      // Predefined colors from VS Code theme colors
+      const colors = [
+        { label: 'Default (None)', value: undefined },
+        { label: '$(circle-large-filled) Red', value: 'charts.red' },
+        { label: '$(circle-large-filled) Blue', value: 'charts.blue' },
+        { label: '$(circle-large-filled) Green', value: 'charts.green' },
+        { label: '$(circle-large-filled) Yellow', value: 'charts.yellow' },
+        { label: '$(circle-large-filled) Orange', value: 'charts.orange' },
+        { label: '$(circle-large-filled) Purple', value: 'charts.purple' },
+      ];
+
+      const selectedColor = await vscode.window.showQuickPick(colors, {
+        placeHolder: 'Select a color',
+      });
+
+      // We explicitly check if undefined was selected (to clear) or a value was selected
+      // Note: selectedColor is undefined if user cancels, so we need to handle that distinction if possible
+      // But here user picks 'Default' which has value undefined.
+      // So if selectedColor is NOT undefined, we proceed.
+      // Wait, if user cancels, selectedColor is undefined.
+      // If user picks 'Default', selectedColor is the object { label: ..., value: undefined }
+
+      if (selectedColor) {
+        try {
+          await changeListManager.setColor(listId, selectedColor.value);
+        } catch (error) {
+          vscode.window.showErrorMessage(`Failed to set color: ${error}`);
+        }
+      }
+    })
+  );
+
 
   // Move to Change List
   disposables.push(
@@ -179,11 +246,13 @@ export function registerCommands(
           label: '$(add) Create New Change List...',
           listId: '__new__',
         },
-        ...lists.map((list) => ({
-          label: list.name,
-          description: list.isActive ? '(Active)' : list.isDefault ? '(Default)' : undefined,
-          listId: list.id,
-        })),
+        ...lists
+          // .filter(list => !list.isReadOnly) // Allow moving to Unversioned Files (triggers unstage)
+          .map((list) => ({
+            label: list.name,
+            description: list.isActive ? '(Active)' : list.isDefault ? '(Default)' : undefined,
+            listId: list.id,
+          })),
       ];
 
       const selected = await vscode.window.showQuickPick(items, {
@@ -208,7 +277,7 @@ export function registerCommands(
         }
 
         try {
-          const newList = await changeListManager.create(name.trim(), undefined, false);
+          const newList = await changeListManager.create(name.trim(), undefined, undefined, false);
           targetListId = newList.id;
         } catch (error) {
           vscode.window.showErrorMessage(`Failed to create change list: ${error}`);
@@ -312,17 +381,116 @@ export function registerCommands(
     })
   );
 
-  // Apply Patch (placeholder for Phase 7)
+  // Apply Patch
   disposables.push(
-    vscode.commands.registerCommand(COMMANDS.APPLY_PATCH, async () => {
-      vscode.window.showInformationMessage('Apply Patch feature coming soon!');
+    vscode.commands.registerCommand(COMMANDS.APPLY_PATCH, async (node?: ChangeListNode) => {
+      let targetListId: string | undefined;
+
+      if (node && node.type === 'changeList') {
+        targetListId = node.changeList.id;
+      } else {
+        // Allow applying patch without context (ask for list)
+        const lists = changeListManager.getLists();
+        const items = lists.map((list) => ({
+          label: list.name,
+          description: list.isActive ? '(Active)' : list.isDefault ? '(Default)' : undefined,
+          listId: list.id,
+        }));
+
+        const selected = await vscode.window.showQuickPick(items, {
+          placeHolder: 'Select change list to apply patch to',
+        });
+
+        if (selected) {
+          targetListId = selected.listId;
+        }
+      }
+
+      if (!targetListId) {
+        return;
+      }
+
+      const source = await vscode.window.showQuickPick(['From File', 'From Clipboard'], {
+        placeHolder: 'Where is the patch coming from?',
+      });
+
+      if (!source) {
+        return;
+      }
+
+      try {
+        if (source === 'From Clipboard') {
+          const clipboardContent = await vscode.env.clipboard.readText();
+          if (!clipboardContent) {
+            vscode.window.showWarningMessage('Clipboard is empty');
+            return;
+          }
+
+          // Create a temp file for the patch since standard git apply expects a file usually,
+          // or we pipe it. Our PatchService.applyPatchToList takes a file path.
+          // Let's defer to PatchService to handle this? 
+          // Actually, PatchService.applyPatchToList takes a path. 
+          // So we should write to a temp file.
+
+          const tempUri = vscode.Uri.file(path.join(vscode.workspace.workspaceFolders?.[0].uri.fsPath || '', 'temp_patch.diff'));
+          await vscode.workspace.fs.writeFile(tempUri, Buffer.from(clipboardContent, 'utf8'));
+
+          await patchService.applyPatchToList(targetListId, tempUri.fsPath);
+
+          // Cleanup temp file
+          await vscode.workspace.fs.delete(tempUri);
+
+        } else {
+          const uris = await vscode.window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            filters: {
+              'Patch Files': ['patch', 'diff'],
+              'All Files': ['*'],
+            },
+          });
+
+          if (uris && uris.length > 0) {
+            await patchService.applyPatchToList(targetListId, uris[0].fsPath);
+          }
+        }
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to apply patch: ${error}`);
+      }
     })
   );
 
-  // Create Patch (placeholder for Phase 7)
+  // Create Patch
   disposables.push(
-    vscode.commands.registerCommand(COMMANDS.CREATE_PATCH, async () => {
-      vscode.window.showInformationMessage('Create Patch feature coming soon!');
+    vscode.commands.registerCommand(COMMANDS.CREATE_PATCH, async (node?: ChangeListNode) => {
+      if (!node || node.type !== 'changeList') {
+        return;
+      }
+
+      const list = node.changeList;
+
+      try {
+        const patchContent = await patchService.generatePatchForList(list.id);
+
+        if (!patchContent) {
+          vscode.window.showInformationMessage('Change list is empty or has no changes to patch.');
+          return;
+        }
+
+        const action = await vscode.window.showQuickPick(['Save to File', 'Copy to Clipboard'], {
+          placeHolder: 'What would you like to do with the patch?',
+        });
+
+        if (action === 'Copy to Clipboard') {
+          await vscode.env.clipboard.writeText(patchContent);
+          vscode.window.showInformationMessage(`Patch for "${list.name}" copied to clipboard`);
+        } else if (action === 'Save to File') {
+          await patchService.savePatchToFile(list, patchContent);
+        }
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to create patch: ${error}`);
+      }
     })
   );
 

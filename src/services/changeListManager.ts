@@ -11,6 +11,7 @@ import {
   STORAGE_KEYS,
   STATE_SCHEMA_VERSION,
   DEFAULT_LIST_NAME,
+  UNVERSIONED_LIST_ID,
 } from '../utils/constants';
 import { generateId, now, getRelativePath } from '../utils/helpers';
 import { logger } from '../utils/logger';
@@ -167,13 +168,27 @@ export class ChangeListManager implements vscode.Disposable {
    * Get all change lists
    */
   getLists(): readonly ChangeList[] {
-    return this.state.lists;
+    const virtualList: ChangeList = {
+      id: UNVERSIONED_LIST_ID,
+      name: 'Unversioned Files',
+      description: 'Files not yet tracked by Git',
+      isActive: false,
+      isDefault: false,
+      isReadOnly: true,
+      createdAt: 0,
+      updatedAt: 0,
+      color: 'charts.orange',
+    };
+    return [...this.state.lists, virtualList];
   }
 
   /**
    * Get a change list by ID
    */
   getList(id: string): ChangeList | undefined {
+    if (id === UNVERSIONED_LIST_ID) {
+      return this.getLists().find(l => l.id === UNVERSIONED_LIST_ID);
+    }
     return this.state.lists.find((list) => list.id === id);
   }
 
@@ -198,8 +213,8 @@ export class ChangeListManager implements vscode.Disposable {
   /**
    * Create a new change list
    */
-  async create(name: string, description?: string, setActive = true): Promise<ChangeList> {
-    logger.debug('ChangeListManager: Creating new list', { name, description, setActive });
+  async create(name: string, description?: string, color?: string, setActive = true): Promise<ChangeList> {
+    logger.debug('ChangeListManager: Creating new list', { name, description, color, setActive });
 
     // Validate name uniqueness
     if (this.state.lists.some((list) => list.name === name)) {
@@ -213,6 +228,7 @@ export class ChangeListManager implements vscode.Disposable {
       id: generateId(),
       name,
       description,
+      color,
       isActive: false,
       isDefault: false,
       createdAt: timestamp,
@@ -236,6 +252,9 @@ export class ChangeListManager implements vscode.Disposable {
    * Rename a change list
    */
   async rename(id: string, newName: string): Promise<void> {
+    if (id === UNVERSIONED_LIST_ID) {
+      throw new Error('Cannot rename the Unversioned Files list');
+    }
     const list = this.getList(id);
     if (!list) {
       throw new Error('Change list not found');
@@ -254,9 +273,28 @@ export class ChangeListManager implements vscode.Disposable {
   }
 
   /**
+   * Set the color of a change list
+   */
+  async setColor(id: string, color: string | undefined): Promise<void> {
+    const list = this.getList(id);
+    if (!list) {
+      throw new Error('Change list not found');
+    }
+
+    list.color = color;
+    list.updatedAt = now();
+
+    await this.persistState();
+    this._onDidChange.fire({ type: 'renamed', changeListId: id }); // 'renamed' triggers a refresh which is enough for now, or add 'updated' type
+  }
+
+  /**
    * Delete a change list
    */
   async delete(id: string): Promise<void> {
+    if (id === UNVERSIONED_LIST_ID) {
+      throw new Error('Cannot delete the Unversioned Files list');
+    }
     const list = this.getList(id);
     if (!list) {
       throw new Error('Change list not found');
@@ -358,8 +396,50 @@ export class ChangeListManager implements vscode.Disposable {
       files: filePaths,
     });
 
-    for (const filePath of filePaths) {
-      this.state.fileMapping[filePath] = targetListId;
+    // Handle moves to Unversioned Files list (unstage files)
+    if (targetListId === UNVERSIONED_LIST_ID) {
+      const uris = filePaths.map((p) => vscode.Uri.file(p));
+      try {
+        await this.gitService.unstageFiles(uris);
+
+        // Remove from file mapping so they fall back to being untracked (which getFilesForList handles)
+        for (const filePath of filePaths) {
+          delete this.state.fileMapping[filePath];
+        }
+      } catch (error) {
+        logger.error('ChangeListManager: Failed to unstage files', error);
+        throw error;
+      }
+    } else {
+      // Handle moves to regular lists
+      const filesToStage: string[] = [];
+
+      for (const filePath of filePaths) {
+        // Update mapping
+        this.state.fileMapping[filePath] = targetListId;
+
+        // Check if file is currently untracked (via git status)
+        // We'll need to check the actual status from GitService or assume based on current list
+        // Best to check if we can stage it. 
+        // Simple approach: Always try to stage if we are moving to a tracked list.
+        // But we should only stage if it's untracked or modified? 
+        // Actually, 'git add' is safe for modified/added/untracked.
+        filesToStage.push(filePath);
+      }
+
+      if (filesToStage.length > 0) {
+        const uris = filesToStage.map((p) => vscode.Uri.file(p));
+        try {
+          await this.gitService.stageFiles(uris);
+        } catch (error) {
+          logger.error('ChangeListManager: Failed to stage files', error);
+          // We continue even if staging fails, as the list assignment is internal state too
+          // But user expects it to be staged. 
+          // If it fails, maybe we shouldn't update the mapping?
+          // For now, let's throw to indicate partial failure
+          throw error;
+        }
+      }
     }
 
     await this.persistState();
@@ -379,7 +459,20 @@ export class ChangeListManager implements vscode.Disposable {
     const workspaceRoot = this.gitService.getWorkspaceRoot();
 
     return modifiedFiles
-      .filter((change) => this.getListIdForFile(change.uri.fsPath) === listId)
+      .filter((change) => {
+        const isUntracked = this.mapGitStatus(change.status) === GitFileStatus.Untracked;
+
+        if (listId === UNVERSIONED_LIST_ID) {
+          return isUntracked;
+        }
+
+        // For other lists, exclude untracked files
+        if (isUntracked) {
+          return false;
+        }
+
+        return this.getListIdForFile(change.uri.fsPath) === listId;
+      })
       .map((change) => ({
         resourceUri: change.uri,
         relativePath: workspaceRoot

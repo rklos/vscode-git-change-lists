@@ -10,6 +10,8 @@ export interface ChangeList {
   name: string;
   /** Optional description/notes for the change list */
   description?: string;
+  /** Optional color for the change list icon */
+  color?: string;
   /** Whether this list receives new unassigned changes */
   isActive: boolean;
   /** Whether this is the system default list (cannot be deleted) */
@@ -18,6 +20,8 @@ export interface ChangeList {
   readonly createdAt: number;
   /** Timestamp of last modification */
   updatedAt: number;
+  /** Whether the list is read-only (e.g. Unversioned Files) */
+  readonly isReadOnly?: boolean;
 }
 
 /**
@@ -88,6 +92,13 @@ export interface ChangeListNode extends TreeNode {
   readonly type: 'changeList';
   readonly changeList: ChangeList;
   readonly fileCount: number;
+  readonly counts: {
+    modified: number;
+    added: number;
+    deleted: number;
+    renamed: number;
+    untracked: number;
+  };
 }
 
 /**

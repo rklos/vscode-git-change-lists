@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
+import * as path from 'path';
 import type { GitExtension, Git, Repository, Change } from '../types/git';
 import { REFRESH_DEBOUNCE_MS } from '../utils/constants';
 import { debounce } from '../utils/helpers';
@@ -274,37 +276,78 @@ export class GitService implements vscode.Disposable {
   }
 
   /**
-   * Stage specific files
+   * Stage specific files using git directly
    */
   async stageFiles(uris: vscode.Uri[]): Promise<void> {
     if (!this.repository || uris.length === 0) {
       return;
     }
 
-    logger.debug('GitService: Staging files', {
-      count: uris.length,
-      files: uris.map(u => u.fsPath),
+    const repoRoot = this.repository.rootUri.fsPath;
+    const filePaths = uris.map(u => u.fsPath);
+
+    logger.debug('GitService: Staging files via git add', {
+      count: filePaths.length,
+      repoRoot,
+      files: filePaths,
     });
 
-    await this.repository.add(uris);
-    logger.info('GitService: Files staged successfully', { count: uris.length });
+    // Use git add directly to bypass VS Code Git extension API issues
+    await this.runGitCommand(repoRoot, ['add', '--', ...filePaths]);
+
+    // Refresh repository state to pick up the changes
+    await this.repository.status();
+
+    logger.info('GitService: Files staged successfully', { count: filePaths.length });
   }
 
   /**
-   * Unstage specific files
+   * Run a git command directly
+   */
+  private runGitCommand(cwd: string, args: string[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      logger.debug('GitService: Running git command', { args, cwd });
+
+      cp.execFile('git', args, { cwd, encoding: 'utf8' }, (error, stdout, stderr) => {
+        if (error) {
+          logger.error('GitService: Git command failed', {
+            args,
+            error: error.message,
+            stderr,
+          });
+          reject(new Error(stderr || error.message));
+        } else {
+          logger.debug('GitService: Git command succeeded', { args });
+          resolve(stdout);
+        }
+      });
+    });
+  }
+
+  /**
+   * Unstage specific files using git directly
    */
   async unstageFiles(uris: vscode.Uri[]): Promise<void> {
     if (!this.repository || uris.length === 0) {
       return;
     }
 
-    logger.debug('GitService: Unstaging files', {
-      count: uris.length,
-      files: uris.map(u => u.fsPath),
+    const repoRoot = this.repository.rootUri.fsPath;
+    const filePaths = uris.map(u => u.fsPath);
+
+    logger.debug('GitService: Unstaging files via git reset', {
+      count: filePaths.length,
+      repoRoot,
+      files: filePaths,
     });
 
-    await this.repository.revert(uris);
-    logger.info('GitService: Files unstaged successfully', { count: uris.length });
+    // Use git reset HEAD to unstage files
+    await this.runGitCommand(repoRoot, ['reset', 'HEAD', '--', ...filePaths]);
+
+    // Refresh repository state to pick up the changes
+    await this.repository.status();
+
+    logger.info('GitService: Files unstaged successfully', { count: filePaths.length });
   }
 
   /**
@@ -360,6 +403,61 @@ export class GitService implements vscode.Disposable {
   setInputBoxValue(value: string): void {
     if (this.repository) {
       this.repository.inputBox.value = value;
+    }
+  }
+
+  /**
+   * Create a patch for specific files
+   */
+  async createPatch(filePaths: string[]): Promise<string> {
+    if (!this.repository || filePaths.length === 0) {
+      return '';
+    }
+
+    const repoRoot = this.repository.rootUri.fsPath;
+
+    // Convert to relative paths with forward slashes for Git consistency
+    // Git commands often behave better with relative paths, especially pathspec matching
+    const relativePaths = filePaths.map(p => {
+      const rel = path.relative(repoRoot, p);
+      return rel.replace(/\\/g, '/');
+    });
+
+    const untrackedToRestage: string[] = [];
+
+    try {
+      // 1. Check for untracked files
+      // Use -z to get null-terminated, unquoted paths (handles non-ASCII/spaces correctly)
+      const untrackedFilterArgs = ['ls-files', '--others', '--exclude-standard', '-z', '--', ...relativePaths];
+      const untrackedOutput = await this.runGitCommand(repoRoot, untrackedFilterArgs);
+
+      const untrackedFiles = untrackedOutput
+        .split('\0')
+        .filter(s => s.length > 0);
+
+      if (untrackedFiles.length > 0) {
+        logger.debug('GitService: Found untracked files, temporarily adding', { count: untrackedFiles.length });
+
+        // Mark them as intent-to-add so they appear in diff
+        await this.runGitCommand(repoRoot, ['add', '-N', '--', ...untrackedFiles]);
+        untrackedToRestage.push(...untrackedFiles);
+      }
+
+      // 2. Generate the diff
+      const args = ['diff', 'HEAD', '--', ...relativePaths];
+      return await this.runGitCommand(repoRoot, args);
+
+    } finally {
+      // 3. Cleanup: Untrack the files we temporarily added
+      if (untrackedToRestage.length > 0) {
+        try {
+          logger.debug('GitService: Restoring untracked state for files', { count: untrackedToRestage.length });
+          // "git reset HEAD -- files" removes them from index but keeps workspace content (back to untracked)
+          await this.runGitCommand(repoRoot, ['reset', 'HEAD', '--', ...untrackedToRestage]);
+        } catch (cleanupError) {
+          logger.error('GitService: Failed to revert untracked files', cleanupError);
+        }
+      }
     }
   }
 

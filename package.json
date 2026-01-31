@@ -2,10 +2,11 @@
   "name": "smart-commit",
   "displayName": "Smart Commit",
   "description": "JetBrains-style Change Lists for VS Code - organize your changes into named lists for focused commits",
-  "version": "0.0.1",
+  "icon": "static/icon.png",
+  "version": "1.0.0",
   "publisher": "maxie-homrich",
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.103.0"
   },
   "categories": [
     "SCM Providers",
@@ -105,6 +106,12 @@
         "title": "Commit (with Guard)",
         "category": "Smart Commit",
         "icon": "$(git-commit)"
+      },
+      {
+        "command": "smartCommit.setListColor",
+        "title": "Set Change List Color",
+        "category": "Smart Commit",
+        "icon": "$(paintcan)"
       }
     ],
     "menus": {
@@ -128,7 +135,7 @@
       "view/item/context": [
         {
           "command": "smartCommit.setActiveList",
-          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListActive",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListActive && viewItem != changeListReadOnly",
           "group": "1_state@1"
         },
         {
@@ -153,25 +160,23 @@
         },
         {
           "command": "smartCommit.renameList",
-          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListReadOnly",
           "group": "3_edit@1"
         },
         {
+          "command": "smartCommit.setListColor",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListReadOnly",
+          "group": "3_edit@2"
+        },
+        {
           "command": "smartCommit.deleteList",
-          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListDefault",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListDefault && viewItem != changeListReadOnly",
           "group": "3_edit@2"
         },
         {
           "command": "smartCommit.moveToList",
           "when": "view == smartCommit.changeLists && viewItem == changeListFile",
           "group": "1_move@1"
-        }
-      ],
-      "scm/inputBox": [
-        {
-          "command": "smartCommit.guardedCommit",
-          "when": "scmProvider == git && config.smartCommit.commitGuard.interceptCommit",
-          "group": "navigation"
         }
       ],
       "commandPalette": [
@@ -287,7 +292,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/joaob/vscode-smart-commit"
+    "url": "https://github.com/maxinne-dev/vscode-smart-commit"
   },
   "license": "MIT"
 }

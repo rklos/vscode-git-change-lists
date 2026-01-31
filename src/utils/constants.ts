@@ -22,6 +22,7 @@ export const COMMANDS = {
   CREATE_PATCH: 'smartCommit.createPatch',
   REFRESH: 'smartCommit.refresh',
   GUARDED_COMMIT: 'smartCommit.guardedCommit',
+  SET_LIST_COLOR: 'smartCommit.setListColor',
 } as const;
 
 /** Configuration keys */
@@ -54,6 +55,9 @@ export const CONTEXT_KEYS = {
 /** Default change list name */
 export const DEFAULT_LIST_NAME = 'Default';
 
+/** Unversioned files list ID */
+export const UNVERSIONED_LIST_ID = 'virtual-unversioned-files-list';
+
 /** Current schema version for state persistence */
 export const STATE_SCHEMA_VERSION = 1;
 
@@ -68,6 +72,7 @@ export const CONTEXT_VALUES = {
   CHANGE_LIST: 'changeList',
   CHANGE_LIST_DEFAULT: 'changeListDefault',
   CHANGE_LIST_ACTIVE: 'changeListActive',
+  CHANGE_LIST_READONLY: 'changeListReadOnly',
   DIRECTORY: 'changeListDirectory',
   FILE: 'changeListFile',
 } as const;

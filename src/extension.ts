@@ -3,6 +3,7 @@ import { ChangeListManager } from './services/changeListManager';
 import { GitService } from './services/gitService';
 import { ConfigService } from './services/configService';
 import { CommitGuardService } from './services/commitGuardService';
+import { PatchService } from './services/patchService';
 import { ChangeListTreeDataProvider } from './providers/treeDataProvider';
 import { ChangeListDragDropController } from './providers/dragDropController';
 import { registerCommands } from './commands';
@@ -39,6 +40,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     await changeListManager.initialize();
     logger.info(`Change list manager initialized with ${changeListManager.getLists().length} lists`);
 
+    // Initialize Patch Service
+    logger.debug('Initializing patch service...');
+    const patchService = new PatchService(changeListManager, gitService);
+
     // Create tree data provider
     logger.debug('Creating tree data provider...');
     const treeDataProvider = new ChangeListTreeDataProvider(
@@ -67,6 +72,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       changeListManager,
       gitService,
       configService,
+      patchService,
       treeDataProvider,
       treeView
     );

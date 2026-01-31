@@ -28,8 +28,7 @@ import { logger } from '../utils/logger';
  * Tree data provider for the change lists view
  */
 export class ChangeListTreeDataProvider
-  implements vscode.TreeDataProvider<AnyTreeNode>, vscode.Disposable
-{
+  implements vscode.TreeDataProvider<AnyTreeNode>, vscode.Disposable {
   private _onDidChangeTreeData = new vscode.EventEmitter<AnyTreeNode | undefined | null | void>();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
@@ -146,6 +145,7 @@ export class ChangeListTreeDataProvider
           label: list.name,
           changeList: list,
           fileCount: 0, // Will be updated on refresh
+          counts: { modified: 0, added: 0, deleted: 0, renamed: 0, untracked: 0 },
         };
       }
     }
@@ -171,6 +171,7 @@ export class ChangeListTreeDataProvider
           label: list.name,
           changeList: list,
           fileCount: 0,
+          counts: { modified: 0, added: 0, deleted: 0, renamed: 0, untracked: 0 },
         };
       }
     }
@@ -189,12 +190,45 @@ export class ChangeListTreeDataProvider
 
     for (const list of sortedLists) {
       const files = await this.getFilesForList(list.id);
+      // Calculate counts
+      const counts = {
+        modified: 0,
+        added: 0,
+        deleted: 0,
+        renamed: 0,
+        untracked: 0,
+      };
+
+      for (const file of files) {
+        switch (file.gitStatus) {
+          case GitFileStatus.Modified:
+            counts.modified++;
+            break;
+          case GitFileStatus.Added:
+            counts.added++;
+            break;
+          case GitFileStatus.Deleted:
+            counts.deleted++;
+            break;
+          case GitFileStatus.Renamed:
+            counts.renamed++;
+            break;
+          case GitFileStatus.Untracked:
+            counts.untracked++;
+            break;
+          case GitFileStatus.Conflict:
+            counts.modified++;
+            break;
+        }
+      }
+
       nodes.push({
         type: 'changeList',
         id: list.id,
         label: list.name,
         changeList: list,
         fileCount: files.length,
+        counts,
       });
     }
 
@@ -375,15 +409,33 @@ export class ChangeListTreeDataProvider
     );
 
     item.id = node.id;
-    item.description = formatFileCount(node.fileCount);
+    item.id = node.id;
+
+    // Format description with simple badges
+    // e.g. "5 files (2 M, 1 A)"
+    const badges: string[] = [];
+    if (node.counts.modified > 0) { badges.push(`${node.counts.modified} M`); }
+    if (node.counts.added > 0) { badges.push(`${node.counts.added} A`); }
+    if (node.counts.deleted > 0) { badges.push(`${node.counts.deleted} D`); }
+    if (node.counts.renamed > 0) { badges.push(`${node.counts.renamed} R`); }
+    if (node.counts.untracked > 0) { badges.push(`${node.counts.untracked} U`); }
+
+    const countStr = formatFileCount(node.fileCount);
+    item.description = badges.length > 0 ? `${countStr} (${badges.join(', ')})` : countStr;
 
     // Set icon based on state
     if (node.changeList.isActive) {
-      item.iconPath = new vscode.ThemeIcon('check', new vscode.ThemeColor('charts.green'));
+      // Active list gets a special check icon, potentially colored if color is set
+      const color = node.changeList.color ? new vscode.ThemeColor(node.changeList.color) : new vscode.ThemeColor('charts.green');
+      item.iconPath = new vscode.ThemeIcon('check', color);
     } else if (node.changeList.isDefault) {
-      item.iconPath = new vscode.ThemeIcon('folder');
+      // Default list
+      const color = node.changeList.color ? new vscode.ThemeColor(node.changeList.color) : undefined;
+      item.iconPath = new vscode.ThemeIcon('folder', color);
     } else {
-      item.iconPath = new vscode.ThemeIcon('folder-opened');
+      // Regular list
+      const color = node.changeList.color ? new vscode.ThemeColor(node.changeList.color) : new vscode.ThemeColor('icon.foreground');
+      item.iconPath = new vscode.ThemeIcon('folder-opened', color);
     }
 
     // Tooltip
@@ -400,7 +452,10 @@ export class ChangeListTreeDataProvider
     item.tooltip = tooltipLines.join('\n');
 
     // Context value for menus
-    if (node.changeList.isDefault) {
+    if (node.changeList.isReadOnly) {
+      item.contextValue = CONTEXT_VALUES.CHANGE_LIST_READONLY;
+      item.iconPath = new vscode.ThemeIcon('question', new vscode.ThemeColor('gitDecoration.untrackedResourceForeground'));
+    } else if (node.changeList.isDefault) {
       item.contextValue = CONTEXT_VALUES.CHANGE_LIST_DEFAULT;
     } else if (node.changeList.isActive) {
       item.contextValue = CONTEXT_VALUES.CHANGE_LIST_ACTIVE;
