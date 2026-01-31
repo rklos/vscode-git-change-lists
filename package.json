@@ -1,0 +1,293 @@
+{
+  "name": "smart-commit",
+  "displayName": "Smart Commit",
+  "description": "JetBrains-style Change Lists for VS Code - organize your changes into named lists for focused commits",
+  "version": "0.0.1",
+  "publisher": "maxie-homrich",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "SCM Providers",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "scm",
+    "changelist",
+    "commit"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "contributes": {
+    "views": {
+      "scm": [
+        {
+          "id": "smartCommit.changeLists",
+          "name": "Change Lists",
+          "when": "gitOpenRepositoryCount > 0",
+          "contextualTitle": "Smart Commit"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "smartCommit.createList",
+        "title": "Create Change List",
+        "category": "Smart Commit",
+        "icon": "$(add)"
+      },
+      {
+        "command": "smartCommit.deleteList",
+        "title": "Delete Change List",
+        "category": "Smart Commit",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "smartCommit.renameList",
+        "title": "Rename Change List",
+        "category": "Smart Commit",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "smartCommit.setActiveList",
+        "title": "Set as Active Change List",
+        "category": "Smart Commit",
+        "icon": "$(check)"
+      },
+      {
+        "command": "smartCommit.moveToList",
+        "title": "Move to Change List",
+        "category": "Smart Commit",
+        "icon": "$(move)"
+      },
+      {
+        "command": "smartCommit.commitList",
+        "title": "Commit Change List",
+        "category": "Smart Commit",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "smartCommit.stageList",
+        "title": "Stage Change List",
+        "category": "Smart Commit",
+        "icon": "$(diff-added)"
+      },
+      {
+        "command": "smartCommit.toggleViewMode",
+        "title": "Toggle List/Tree View",
+        "category": "Smart Commit",
+        "icon": "$(list-tree)"
+      },
+      {
+        "command": "smartCommit.applyPatch",
+        "title": "Apply Patch to Change List",
+        "category": "Smart Commit",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "smartCommit.createPatch",
+        "title": "Create Patch from Change List",
+        "category": "Smart Commit",
+        "icon": "$(export)"
+      },
+      {
+        "command": "smartCommit.refresh",
+        "title": "Refresh Change Lists",
+        "category": "Smart Commit",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "smartCommit.guardedCommit",
+        "title": "Commit (with Guard)",
+        "category": "Smart Commit",
+        "icon": "$(git-commit)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "smartCommit.createList",
+          "when": "view == smartCommit.changeLists",
+          "group": "navigation@1"
+        },
+        {
+          "command": "smartCommit.toggleViewMode",
+          "when": "view == smartCommit.changeLists",
+          "group": "navigation@2"
+        },
+        {
+          "command": "smartCommit.refresh",
+          "when": "view == smartCommit.changeLists",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "smartCommit.setActiveList",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListActive",
+          "group": "1_state@1"
+        },
+        {
+          "command": "smartCommit.stageList",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/",
+          "group": "2_actions@1"
+        },
+        {
+          "command": "smartCommit.commitList",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/",
+          "group": "2_actions@2"
+        },
+        {
+          "command": "smartCommit.applyPatch",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/",
+          "group": "2_actions@3"
+        },
+        {
+          "command": "smartCommit.createPatch",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/",
+          "group": "2_actions@4"
+        },
+        {
+          "command": "smartCommit.renameList",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/",
+          "group": "3_edit@1"
+        },
+        {
+          "command": "smartCommit.deleteList",
+          "when": "view == smartCommit.changeLists && viewItem =~ /^changeList/ && viewItem != changeListDefault",
+          "group": "3_edit@2"
+        },
+        {
+          "command": "smartCommit.moveToList",
+          "when": "view == smartCommit.changeLists && viewItem == changeListFile",
+          "group": "1_move@1"
+        }
+      ],
+      "scm/inputBox": [
+        {
+          "command": "smartCommit.guardedCommit",
+          "when": "scmProvider == git && config.smartCommit.commitGuard.interceptCommit",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "smartCommit.deleteList",
+          "when": "false"
+        },
+        {
+          "command": "smartCommit.renameList",
+          "when": "false"
+        },
+        {
+          "command": "smartCommit.commitList",
+          "when": "false"
+        },
+        {
+          "command": "smartCommit.stageList",
+          "when": "false"
+        },
+        {
+          "command": "smartCommit.createPatch",
+          "when": "false"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "smartCommit.setActiveList",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l",
+        "when": "view == smartCommit.changeLists"
+      },
+      {
+        "command": "smartCommit.moveToList",
+        "key": "alt+shift+m",
+        "when": "view == smartCommit.changeLists && viewItem == changeListFile"
+      },
+      {
+        "command": "smartCommit.guardedCommit",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "scmRepository && config.smartCommit.commitGuard.interceptCommit && scmInputIsFocused"
+      }
+    ],
+    "configuration": {
+      "title": "Smart Commit",
+      "properties": {
+        "smartCommit.defaultViewMode": {
+          "type": "string",
+          "enum": [
+            "list",
+            "tree"
+          ],
+          "default": "list",
+          "description": "Default view mode for displaying files in change lists"
+        },
+        "smartCommit.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the active change list in the status bar"
+        },
+        "smartCommit.confirmDeleteNonEmpty": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for confirmation before deleting a non-empty change list"
+        },
+        "smartCommit.autoActivateNew": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically set newly created change lists as active"
+        },
+        "smartCommit.commitGuard.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn when attempting to commit files from multiple change lists"
+        },
+        "smartCommit.commitGuard.interceptCommit": {
+          "type": "boolean",
+          "default": false,
+          "description": "Intercept the native Git commit command to apply the commit guard (requires restart)"
+        },
+        "smartCommit.autoAssignStagedFiles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically assign externally staged files to the active change list"
+        },
+        "smartCommit.debug.enableLogging": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable debug logging to the output channel (verbose)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "^20.x",
+    "@types/uuid": "^10.0.0",
+    "@types/vscode": "^1.74.0",
+    "@vscode/vsce": "^2.x",
+    "typescript": "^5.x"
+  },
+  "dependencies": {
+    "simple-git": "^3.x",
+    "uuid": "^9.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joaob/vscode-smart-commit"
+  },
+  "license": "MIT"
+}
