@@ -1,5 +1,5 @@
 /**
- * Type exports for Smart Commit extension
+ * Type exports for Git Change Lists extension
  */
 
 export * from './changeList';

@@ -1,21 +1,21 @@
-![Smart Commit Cover](static/cover.png)
+![Git Change Lists Cover](static/cover.png)
 
-# Smart Commit
+# Git Change Lists
 
 > JetBrains-style Change Lists for VS Code and compatible editors
 
-**Smart Commit** brings the powerful change list management from JetBrains IDEs (IntelliJ IDEA, WebStorm, PHPStorm, etc.) to Visual Studio Code, Cursor, Kiro, Windsurf, Trae, VSCodium, and Google Antigravity. Organize your uncommitted changes into named lists, work on multiple features in parallel, and commit only related changes together.
+**Git Change Lists** brings the powerful change list management from JetBrains IDEs (IntelliJ IDEA, WebStorm, PHPStorm, etc.) to Visual Studio Code, Cursor, Kiro, Windsurf, Trae, VSCodium, and Google Antigravity. Organize your uncommitted changes into named lists, work on multiple features in parallel, and commit only related changes together.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/maxinne-dev/vscode-smart-commit)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/maxinne-dev/vscode-git-change-lists)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/maxinne-dev/vscode-smart-commit.svg)](https://github.com/maxinne-dev/vscode-smart-commit/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/maxinne-dev/vscode-git-change-lists.svg)](https://github.com/maxinne-dev/vscode-git-change-lists/stargazers)
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Why Use Smart Commit?](#why-use-smart-commit)
+- [Why Use Git Change Lists?](#why-use-git-change-lists)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Core Features](#core-features)
@@ -32,7 +32,7 @@
 
 ## Overview
 
-Smart Commit transforms how you organize Git changes by introducing **change lists**—named containers that group related files together. Instead of VS Code's simple staged/unstaged binary model, you can maintain multiple logical groupings of changes simultaneously, just like in JetBrains IDEs.
+Git Change Lists transforms how you organize Git changes by introducing **change lists**—named containers that group related files together. Instead of VS Code's simple staged/unstaged binary model, you can maintain multiple logical groupings of changes simultaneously, just like in JetBrains IDEs.
 
 ### Key Features
 
@@ -48,7 +48,7 @@ Smart Commit transforms how you organize Git changes by introducing **change lis
 
 ---
 
-## Why Use Smart Commit?
+## Why Use Git Change Lists?
 
 ### The Problem
 
@@ -69,7 +69,7 @@ Change lists let you:
 
 ### Coming from JetBrains IDEs?
 
-If you're a WebStorm, IntelliJ IDEA, or PHPStorm user who's had to switch to VS Code, you've probably missed the change lists feature. Smart Commit brings that familiar workflow to your editor, with:
+If you're a WebStorm, IntelliJ IDEA, or PHPStorm user who's had to switch to VS Code, you've probably missed the change lists feature. Git Change Lists brings that familiar workflow to your editor, with:
 
 - Similar UI patterns (drag-and-drop, context menus)
 - Active list concept with auto-assignment
@@ -82,11 +82,11 @@ If you're a WebStorm, IntelliJ IDEA, or PHPStorm user who's had to switch to VS 
 
 ### 1. From VS Code Marketplace
 1. Open VS Code, Cursor, Kiro, Windsurf, Trae, VSCodium, or Antigravity.
-2. Search for **Smart Commit** in the Extensions view (`Ctrl+Shift+X`).
+2. Search for **Git Change Lists** in the Extensions view (`Ctrl+Shift+X`).
 3. Click **Install**.
 
 ### 2. From VSIX File
-1. Download the latest `.vsix` file from [Releases](https://github.com/maxinne-dev/vscode-smart-commit/releases).
+1. Download the latest `.vsix` file from [Releases](https://github.com/maxinne-dev/vscode-git-change-lists/releases).
 2. Open the Command Palette (`Ctrl+Shift+P`) and run `Extensions: Install from VSIX...`.
 3. Select the downloaded file.
 
@@ -105,12 +105,12 @@ For detailed installation instructions for specific editors, see [docs/INSTALLAT
 
 ### 1. Open a Git Repository
 
-Smart Commit activates automatically when a Git repository is detected.
+Git Change Lists activates automatically when a Git repository is detected.
 
 ### 2. Create Your First Change List
 
 - Click the **+** icon in the Change Lists view header, or
-- Open Command Palette (`Ctrl+Shift+P`) and run `Smart Commit: Create Change List`
+- Open Command Palette (`Ctrl+Shift+P`) and run `Git Change Lists: Create Change List`
 - Enter a name like "Feature: User Authentication"
 
 ### 3. Move Files to Your List
@@ -143,7 +143,7 @@ The committed files are automatically removed from your change list.
 
 Create named containers to organize your changes:
 - Click the **+** icon in the view header
-- Use Command Palette: `Smart Commit: Create Change List`
+- Use Command Palette: `Git Change Lists: Create Change List`
 - Enter a descriptive name (e.g., "Feature X", "Bugfix: Login", "Refactor DB")
 
 #### Active List
@@ -204,13 +204,13 @@ Hierarchical view preserving project structure:
 - Shows directory organization
 - Collapsible folders with badges showing child counts
 
-**Toggle**: Click the tree/list icon in the view header, or use `Smart Commit: Toggle List/Tree View`
+**Toggle**: Click the tree/list icon in the view header, or use `Git Change Lists: Toggle List/Tree View`
 
 View mode and expansion state persist across sessions.
 
 ### Git Integration
 
-Smart Commit extends VS Code's Git integration without replacing it:
+Git Change Lists extends VS Code's Git integration without replacing it:
 
 #### Real-Time Synchronization
 
@@ -248,7 +248,7 @@ When `commitGuard.enabled` is true (default):
 #### Using the Guard
 
 - **Via Keybinding**: `Ctrl+Enter` / `Cmd+Enter` in the SCM input box (if `commitGuard.interceptCommit` is enabled)
-- **Via Command**: `Smart Commit: Commit (with Guard)`
+- **Via Command**: `Git Change Lists: Commit (with Guard)`
 
 **Note**: The guard cannot intercept the native commit button click due to VS Code API limitations. Use the keybinding for guarded commits.
 
@@ -259,11 +259,11 @@ The status bar shows:
 - Full name in tooltip on hover
 - Click to quickly switch active lists
 
-Toggle visibility with `smartCommit.showStatusBar` setting.
+Toggle visibility with `gitChangeLists.showStatusBar` setting.
 
 ### Multi-Root Workspace Support
 
-Smart Commit works with multi-root workspaces:
+Git Change Lists works with multi-root workspaces:
 - Each workspace folder has independent change lists
 - State is isolated per repository
 - Seamless switching between folders
@@ -276,15 +276,15 @@ Smart Commit works with multi-root workspaces:
 
 | Command | ID | Description | Default Keybinding |
 |---------|-----|-------------|-------------------|
-| Create Change List | `smartCommit.createList` | Create a new named change list | — |
-| Set as Active Change List | `smartCommit.setActiveList` | Mark a list as active for auto-assignment | `Ctrl+Shift+L` / `Cmd+Shift+L` |
-| Move to Change List | `smartCommit.moveToList` | Move selected file(s) to another list | `Alt+Shift+M` |
-| Rename Change List | `smartCommit.renameList` | Rename a change list | — |
-| Delete Change List | `smartCommit.deleteList` | Delete a change list (with confirmation) | — |
-| Stage Change List | `smartCommit.stageList` | Stage all files in a change list | — |
-| Toggle List/Tree View | `smartCommit.toggleViewMode` | Switch between flat and hierarchical views | — |
-| Commit (with Guard) | `smartCommit.guardedCommit` | Commit with validation of staged files | `Ctrl+Enter` / `Cmd+Enter` (in SCM input) |
-| Refresh Change Lists | `smartCommit.refresh` | Manually refresh the view | — |
+| Create Change List | `gitChangeLists.createList` | Create a new named change list | — |
+| Set as Active Change List | `gitChangeLists.setActiveList` | Mark a list as active for auto-assignment | `Ctrl+Shift+L` / `Cmd+Shift+L` |
+| Move to Change List | `gitChangeLists.moveToList` | Move selected file(s) to another list | `Alt+Shift+M` |
+| Rename Change List | `gitChangeLists.renameList` | Rename a change list | — |
+| Delete Change List | `gitChangeLists.deleteList` | Delete a change list (with confirmation) | — |
+| Stage Change List | `gitChangeLists.stageList` | Stage all files in a change list | — |
+| Toggle List/Tree View | `gitChangeLists.toggleViewMode` | Switch between flat and hierarchical views | — |
+| Commit (with Guard) | `gitChangeLists.guardedCommit` | Commit with validation of staged files | `Ctrl+Enter` / `Cmd+Enter` (in SCM input) |
+| Refresh Change Lists | `gitChangeLists.refresh` | Manually refresh the view | — |
 
 ### Customizing Keybindings
 
@@ -293,8 +293,8 @@ Modify keybindings in **File → Preferences → Keyboard Shortcuts** or edit `k
 ```json
 {
   "key": "ctrl+shift+l",
-  "command": "smartCommit.setActiveList",
-  "when": "view == smartCommit.changeLists"
+  "command": "gitChangeLists.setActiveList",
+  "when": "view == gitChangeLists.changeLists"
 }
 ```
 
@@ -302,31 +302,31 @@ Modify keybindings in **File → Preferences → Keyboard Shortcuts** or edit `k
 
 ## Configuration
 
-Smart Commit can be configured via **File → Preferences → Settings** or `settings.json`.
+Git Change Lists can be configured via **File → Preferences → Settings** or `settings.json`.
 
 ### Available Settings
 
 | Setting | Type | Default | Description |
 |---------|------|---------|-------------|
-| `smartCommit.defaultViewMode` | `"list"` `"tree"` | `"list"` | Default view mode for displaying files |
-| `smartCommit.showStatusBar` | `boolean` | `true` | Show the active change list in the status bar |
-| `smartCommit.confirmDeleteNonEmpty` | `boolean` | `true` | Ask for confirmation before deleting non-empty lists |
-| `smartCommit.autoActivateNew` | `boolean` | `true` | Automatically set newly created lists as active |
-| `smartCommit.commitGuard.enabled` | `boolean` | `true` | Warn when committing files from multiple lists |
-| `smartCommit.commitGuard.interceptCommit` | `boolean` | `false` | Intercept native commit command (requires restart) |
-| `smartCommit.autoAssignStagedFiles` | `boolean` | `true` | Auto-assign externally staged files to active list |
-| `smartCommit.debug.enableLogging` | `boolean` | `false` | Enable verbose debug logging to output channel |
+| `gitChangeLists.defaultViewMode` | `"list"` `"tree"` | `"list"` | Default view mode for displaying files |
+| `gitChangeLists.showStatusBar` | `boolean` | `true` | Show the active change list in the status bar |
+| `gitChangeLists.confirmDeleteNonEmpty` | `boolean` | `true` | Ask for confirmation before deleting non-empty lists |
+| `gitChangeLists.autoActivateNew` | `boolean` | `true` | Automatically set newly created lists as active |
+| `gitChangeLists.commitGuard.enabled` | `boolean` | `true` | Warn when committing files from multiple lists |
+| `gitChangeLists.commitGuard.interceptCommit` | `boolean` | `false` | Intercept native commit command (requires restart) |
+| `gitChangeLists.autoAssignStagedFiles` | `boolean` | `true` | Auto-assign externally staged files to active list |
+| `gitChangeLists.debug.enableLogging` | `boolean` | `false` | Enable verbose debug logging to output channel |
 
 ### Example Configuration
 
 ```json
 {
-  "smartCommit.defaultViewMode": "tree",
-  "smartCommit.showStatusBar": true,
-  "smartCommit.autoActivateNew": true,
-  "smartCommit.commitGuard.enabled": true,
-  "smartCommit.autoAssignStagedFiles": true,
-  "smartCommit.debug.enableLogging": false
+  "gitChangeLists.defaultViewMode": "tree",
+  "gitChangeLists.showStatusBar": true,
+  "gitChangeLists.autoActivateNew": true,
+  "gitChangeLists.commitGuard.enabled": true,
+  "gitChangeLists.autoAssignStagedFiles": true,
+  "gitChangeLists.debug.enableLogging": false
 }
 ```
 
@@ -394,7 +394,7 @@ Combine with traditional Git workflows:
 
 ## Roadmap
 
-Smart Commit is actively developed. Here's what's planned for future releases:
+Git Change Lists is actively developed. Here's what's planned for future releases:
 
 ### Version 1.0.0 (In Progress)
 
@@ -431,7 +431,7 @@ Smart Commit is actively developed. Here's what's planned for future releases:
 
 ### Future Considerations
 
-- **Unversioned Files List**: Special list for untracked files with "Add to VCS" actions
+- **Unversioned Files List**: Special list for untracked files with "Add VCS" actions
 - **Context Snapshot**: Preserve IDE state (open files, cursor positions) with lists
 - **Commit Templates**: Pre-fill commit messages based on change list content
 - **External Tracker Integration**: Link change lists to Jira, Linear, or GitHub issues
@@ -458,11 +458,11 @@ Comprehensive documentation is available in the `/docs` directory:
 
 ## Contributing
 
-Contributions are welcome! Smart Commit is an open-source project and benefits from community input.
+Contributions are welcome! Git Change Lists is an open-source project and benefits from community input.
 
 ### How to Contribute
 
-- **Report Bugs**: Open an issue on [GitHub](https://github.com/maxinne-dev/vscode-smart-commit/issues)
+- **Report Bugs**: Open an issue on [GitHub](https://github.com/maxinne-dev/vscode-git-change-lists/issues)
 - **Request Features**: Describe your use case in an issue
 - **Improve Documentation**: Submit PRs for typos, clarifications, or new guides
 - **Write Code**: See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for development setup
@@ -470,8 +470,8 @@ Contributions are welcome! Smart Commit is an open-source project and benefits f
 ### Development Setup
 
 ```bash
-git clone https://github.com/maxinne-dev/vscode-smart-commit.git
-cd vscode-smart-commit
+git clone https://github.com/maxinne-dev/vscode-git-change-lists.git
+cd vscode-git-change-lists
 npm install
 npm run compile
 ```
@@ -488,13 +488,13 @@ For detailed development instructions, see [docs/DEVELOPMENT.md](docs/DEVELOPMEN
 
 - **Documentation**: Check the [docs](docs/) folder first
 - **FAQ**: See [docs/FAQ.md](docs/FAQ.md) for common questions
-- **Issues**: Search [existing issues](https://github.com/maxinne-dev/vscode-smart-commit/issues) or open a new one
-- **Discussions**: Join [GitHub Discussions](https://github.com/maxinne-dev/vscode-smart-commit/discussions) for community support
+- **Issues**: Search [existing issues](https://github.com/maxinne-dev/vscode-git-change-lists/issues) or open a new one
+- **Discussions**: Join [GitHub Discussions](https://github.com/maxinne-dev/vscode-git-change-lists/discussions) for community support
 
 ### Reporting Bugs
 
 When reporting bugs, please include:
-1. Extension version (`0.0.1`)
+1. Extension version (`1.0.0`)
 2. Editor name and version (VS Code, Cursor, etc.)
 3. Steps to reproduce the issue
 4. Expected vs actual behavior
@@ -512,12 +512,12 @@ We love hearing about new use cases! When requesting features:
 
 ## License
 
-Smart Commit is licensed under the [MIT License](LICENSE).
+Git Change Lists is licensed under the [MIT License](LICENSE).
 
 ```
 MIT License
 
-Copyright (c) 2026 Smart Commit Contributors
+Copyright (c) 2026 Git Change Lists Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -550,4 +550,4 @@ SOFTWARE.
 
 Made with ✓ for developers who want better Git workflows
 
-[Report Bug](https://github.com/maxinne-dev/vscode-smart-commit/issues) • [Request Feature](https://github.com/maxinne-dev/vscode-smart-commit/issues) • [View Documentation](docs/)
+[Report Bug](https://github.com/maxinne-dev/vscode-git-change-lists/issues) • [Request Feature](https://github.com/maxinne-dev/vscode-git-change-lists/issues) • [View Documentation](docs/)

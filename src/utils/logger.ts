@@ -9,7 +9,7 @@ export class Logger {
   private isDebugEnabled = false;
 
   private constructor() {
-    this.outputChannel = vscode.window.createOutputChannel('Smart Commit');
+    this.outputChannel = vscode.window.createOutputChannel('Git Change Lists');
   }
 
   static getInstance(): Logger {

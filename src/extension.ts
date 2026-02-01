@@ -14,7 +14,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Register logger output channel
   context.subscriptions.push(logger.getOutputChannel());
 
-  logger.info('Activating Smart Commit extension...');
+  logger.info('Activating Git Change Lists extension...');
 
   try {
     // Initialize services
@@ -155,7 +155,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       logger.event('Config', 'Configuration changed');
 
       // Update debug logging if that setting changed
-      if (e.affectsConfiguration('smartCommit.debug.enableLogging')) {
+      if (e.affectsConfiguration('gitChangeLists.debug.enableLogging')) {
         const newValue = configService.getDebugLoggingEnabled();
         logger.setDebugEnabled(newValue);
       }
@@ -171,14 +171,14 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       treeDataProvider
     );
 
-    logger.info('Smart Commit extension activated successfully!');
+    logger.info('Git Change Lists extension activated successfully!');
   } catch (error) {
     logger.error('Failed to activate extension', error);
-    vscode.window.showErrorMessage(`Smart Commit failed to activate: ${error}`);
+    vscode.window.showErrorMessage(`Git Change Lists failed to activate: ${error}`);
   }
 }
 
 export function deactivate(): void {
-  logger.info('Smart Commit extension deactivated');
+  logger.info('Git Change Lists extension deactivated');
   logger.dispose();
 }

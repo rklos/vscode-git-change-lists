@@ -3,31 +3,31 @@
  */
 
 /** Extension identifier */
-export const EXTENSION_ID = 'smart-commit';
+export const EXTENSION_ID = 'git-change-lists';
 
 /** View identifiers */
-export const VIEW_ID = 'smartCommit.changeLists';
+export const VIEW_ID = 'gitChangeLists.changeLists';
 
 /** Command identifiers */
 export const COMMANDS = {
-  CREATE_LIST: 'smartCommit.createList',
-  DELETE_LIST: 'smartCommit.deleteList',
-  RENAME_LIST: 'smartCommit.renameList',
-  SET_ACTIVE_LIST: 'smartCommit.setActiveList',
-  MOVE_TO_LIST: 'smartCommit.moveToList',
-  COMMIT_LIST: 'smartCommit.commitList',
-  STAGE_LIST: 'smartCommit.stageList',
-  TOGGLE_VIEW_MODE: 'smartCommit.toggleViewMode',
-  APPLY_PATCH: 'smartCommit.applyPatch',
-  CREATE_PATCH: 'smartCommit.createPatch',
-  REFRESH: 'smartCommit.refresh',
-  GUARDED_COMMIT: 'smartCommit.guardedCommit',
-  SET_LIST_COLOR: 'smartCommit.setListColor',
+  CREATE_LIST: 'gitChangeLists.createList',
+  DELETE_LIST: 'gitChangeLists.deleteList',
+  RENAME_LIST: 'gitChangeLists.renameList',
+  SET_ACTIVE_LIST: 'gitChangeLists.setActiveList',
+  MOVE_TO_LIST: 'gitChangeLists.moveToList',
+  COMMIT_LIST: 'gitChangeLists.commitList',
+  STAGE_LIST: 'gitChangeLists.stageList',
+  TOGGLE_VIEW_MODE: 'gitChangeLists.toggleViewMode',
+  APPLY_PATCH: 'gitChangeLists.applyPatch',
+  CREATE_PATCH: 'gitChangeLists.createPatch',
+  REFRESH: 'gitChangeLists.refresh',
+  GUARDED_COMMIT: 'gitChangeLists.guardedCommit',
+  SET_LIST_COLOR: 'gitChangeLists.setListColor',
 } as const;
 
 /** Configuration keys */
 export const CONFIG = {
-  SECTION: 'smartCommit',
+  SECTION: 'gitChangeLists',
   DEFAULT_VIEW_MODE: 'defaultViewMode',
   SHOW_STATUS_BAR: 'showStatusBar',
   CONFIRM_DELETE_NON_EMPTY: 'confirmDeleteNonEmpty',
@@ -40,16 +40,16 @@ export const CONFIG = {
 
 /** Storage keys */
 export const STORAGE_KEYS = {
-  CHANGE_LIST_STATE: 'smartCommit.changeListState',
-  VIEW_MODE: 'smartCommit.viewMode',
-  EXPANSION_STATE: 'smartCommit.expansionState',
+  CHANGE_LIST_STATE: 'gitChangeLists.changeListState',
+  VIEW_MODE: 'gitChangeLists.viewMode',
+  EXPANSION_STATE: 'gitChangeLists.expansionState',
 } as const;
 
 /** Context keys for when clauses */
 export const CONTEXT_KEYS = {
   LIST_IS_DEFAULT: 'listIsDefault',
   LIST_IS_ACTIVE: 'listIsActive',
-  HAS_CHANGES: 'smartCommit.hasChanges',
+  HAS_CHANGES: 'gitChangeLists.hasChanges',
 } as const;
 
 /** Default change list name */
@@ -65,7 +65,7 @@ export const STATE_SCHEMA_VERSION = 1;
 export const REFRESH_DEBOUNCE_MS = 150;
 
 /** MIME type for drag and drop operations */
-export const DRAG_MIME_TYPE = 'application/vnd.code.tree.smartcommit.changelists';
+export const DRAG_MIME_TYPE = 'application/vnd.code.tree.gitchangelists.changelists';
 
 /** Tree item context values */
 export const CONTEXT_VALUES = {

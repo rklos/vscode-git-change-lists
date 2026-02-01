@@ -31,7 +31,7 @@ export class CommitGuardService implements vscode.Disposable {
     private readonly changeListManager: ChangeListManager,
     private readonly gitService: GitService,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   /**
    * Initialize the commit guard by intercepting the git.commit command
@@ -41,7 +41,7 @@ export class CommitGuardService implements vscode.Disposable {
     // that wraps the git.commit command
     this.disposables.push(
       vscode.commands.registerCommand(
-        'smartCommit.guardedCommit',
+        'gitChangeLists.guardedCommit',
         async () => this.handleGuardedCommit()
       )
     );
