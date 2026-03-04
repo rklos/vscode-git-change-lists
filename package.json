@@ -3,7 +3,7 @@
   "displayName": "Git Change Lists",
   "description": "JetBrains-style Change Lists for VS Code - organize your changes into named lists for focused commits",
   "icon": "static/icon.png",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "maxie-homrich",
   "engines": {
     "vscode": "^1.103.0"
@@ -282,13 +282,9 @@
   "devDependencies": {
     "@types/node": "^20.x",
     "@types/uuid": "^10.0.0",
-    "@types/vscode": "^1.74.0",
+    "@types/vscode": "^1.103.0",
     "@vscode/vsce": "^2.x",
     "typescript": "^5.x"
-  },
-  "dependencies": {
-    "simple-git": "^3.x",
-    "uuid": "^9.x"
   },
   "repository": {
     "type": "git",
