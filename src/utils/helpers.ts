@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 /**
- * Generate a new UUID v4
+ * Generate a new UUID
  */
 export function generateId(): string {
-  return uuidv4();
+  return randomUUID();
 }
 
 /**
